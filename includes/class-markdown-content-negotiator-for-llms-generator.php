@@ -120,7 +120,7 @@ class Markdown_Content_Negotiator_For_LLMs_Generator {
 		if ( has_blocks( $content ) ) {
 			$markdown .= $this->convert_blocks_to_markdown( $content );
 		} else {
-			$markdown .= $this->convert_html_to_markdown( $content );
+			$markdown .= $this->convert_html_to_markdown( do_shortcode( $content ) );
 		}
 
 		return trim( $markdown );
@@ -140,7 +140,7 @@ class Markdown_Content_Negotiator_For_LLMs_Generator {
 			if ( ! empty( $block['blockName'] ) ) {
 				switch ( $block['blockName'] ) {
 					case 'core/paragraph':
-						$output .= wp_strip_all_tags( $block['innerHTML'] ) . "\n\n";
+						$output .= $this->convert_html_to_markdown( do_shortcode( $block['innerHTML'] ) ) . "\n\n";
 						break;
 					case 'core/heading':
 						$level   = isset( $block['attrs']['level'] ) ? $block['attrs']['level'] : 2;
@@ -158,7 +158,7 @@ class Markdown_Content_Negotiator_For_LLMs_Generator {
 						$output .= "```\n" . wp_strip_all_tags( $block['innerHTML'] ) . "\n```\n\n";
 						break;
 					default:
-						$output .= wp_strip_all_tags( render_block( $block ) ) . "\n\n";
+						$output .= $this->convert_html_to_markdown( do_shortcode( render_block( $block ) ) ) . "\n\n";
 						break;
 				}
 			}
