@@ -238,7 +238,18 @@ class Markdown_Content_Negotiator_For_LLMs_Generator {
 
 		$markdown = preg_replace( '/<h([1-6])>(.*?)<\/h\1>/i', "\n" . str_repeat( '#', (int) '\\1' ) . ' $2' . "\n", $markdown );
 
-		$markdown = preg_replace( '/<a[^>]*href=["\'](.*?)["\'][^>]*>(.*?)<\/a>/i', '[$2]($1)', $markdown );
+		$markdown = preg_replace_callback(
+			'#<a\s(?:[^>]*\s)?href=(["\'])(.*?)\1[^>]*>(.*?)</a>#is',
+			function ( $m ) {
+				$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $m[3] ) ) );
+				$href = trim( $m[2] );
+				if ( '' === $text || '' === $href ) {
+					return $text;
+				}
+				return '[' . $text . '](' . $href . ')';
+			},
+			$markdown
+		);
 
 		$markdown = preg_replace( '/<(strong|b)>(.*?)<\/\1>/i', '**$2**', $markdown );
 		$markdown = preg_replace( '/<(em|i)>(.*?)<\/\1>/i', '*$2*', $markdown );
